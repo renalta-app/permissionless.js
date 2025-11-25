@@ -13,6 +13,20 @@ export {
 } from "./simple/to7702SimpleSmartAccount.js"
 
 export {
+    type ModularSmartAccountImplementation,
+    type ToModularSmartAccountParameters,
+    type ToModularSmartAccountReturnType,
+    toModularSmartAccount
+} from "./modular/toModularSmartAccount.js"
+
+export {
+    type To7702ModularSmartAccountImplementation,
+    type To7702ModularSmartAccountParameters,
+    type To7702ModularSmartAccountReturnType,
+    to7702ModularSmartAccount
+} from "./modular/to7702ModularSmartAccount.js"
+
+export {
     type LightAccountVersion,
     type LightSmartAccountImplementation,
     type ToLightSmartAccountParameters,

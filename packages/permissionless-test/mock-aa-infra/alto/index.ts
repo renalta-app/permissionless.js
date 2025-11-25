@@ -44,6 +44,8 @@ import {
     KERNEL_V07_V3_3_FACTORY_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V110_CREATECALL,
     LIGHT_ACCOUNT_FACTORY_V200_CREATECALL,
+    MODULAR_ACCOUNT_FACTORY_BYTECODE,
+    MODULAR_ACCOUNT_IMPLEMENTATION_BYTECODE,
     NEXUS_ACCOUNT_BOOTSTRAPPER_CREATECALL,
     NEXUS_ACCOUNT_IMPLEMENTATION_CREATECALL,
     NEXUS_BOOTSTRAP_LIB_CREATECALL,
@@ -127,6 +129,16 @@ export const setupContracts = async (rpc: string) => {
     await anvilClient.setCode({
         address: SAFE_SINGLETON_FACTORY,
         bytecode: SAFE_SINGLETON_FACTORY_BYTECODE
+    })
+
+    // Etch Modular Account contracts at their vanity addresses
+    await anvilClient.setCode({
+        address: "0x00aa01009bc20e8a223c995a1527f0cbe9340bd5",
+        bytecode: MODULAR_ACCOUNT_IMPLEMENTATION_BYTECODE
+    })
+    await anvilClient.setCode({
+        address: "0x00af0100b5d4dd9bacc054282c103530287e7305",
+        bytecode: MODULAR_ACCOUNT_FACTORY_BYTECODE
     })
 
     await Promise.all([
@@ -713,6 +725,8 @@ export const setupContracts = async (rpc: string) => {
         "0x4337084d9e255ff0702461cf8895ce9e3b5ff108", // EntryPoint 0.8
         "0x13E9ed32155810FDbd067D4522C492D6f68E5944", // Simple Account Factory 0.8
         "0xe6Cae83BdE06E4c305530e199D7217f42808555B", // Simple Account V0.8 implementation
+        // "0x00af01003c0beabb4d128ba12145bc7903b8dc26", // Modular Account Factory 0.8
+        // "0x00aa0100499ca89110aecf2b743032a07cccf23c", // Modular Account Implementation 0.8
         "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7", // Safe Singleton Factory
         "0x988C135a1049Ce61730724afD342fb7C56CD2776", // Biconomy Singleton Factory
         "0x0000000071727De22E5E9d8BAf0edAc6f37da032", // EntryPoint 0.7

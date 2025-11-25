@@ -11,7 +11,14 @@ import { uninstallModule } from "./uninstallModule"
 
 describe.each(getCoreSmartAccounts())(
     "uninstallModule $name",
-    ({ getErc7579SmartAccountClient, name, isEip7702Compliant }) => {
+    ({
+        getErc7579SmartAccountClient,
+        name,
+        isEip7702Compliant,
+        supportsEntryPointV06,
+        supportsEntryPointV07,
+        supportsEntryPointV08
+    }) => {
         testWithRpc.skipIf(!getErc7579SmartAccountClient)(
             "uninstallModule",
             async ({ rpc }) => {
@@ -24,10 +31,16 @@ describe.each(getCoreSmartAccounts())(
 
                 const privateKeyAccount = privateKeyToAccount(privateKey)
 
+                const entryPointVersion = supportsEntryPointV08
+                    ? "0.8"
+                    : supportsEntryPointV07
+                      ? "0.7"
+                      : "0.6"
+
                 const smartClientWithoutExtend =
                     await getErc7579SmartAccountClient({
                         entryPoint: {
-                            version: "0.7"
+                            version: entryPointVersion
                         },
                         privateKey,
                         ...rpc

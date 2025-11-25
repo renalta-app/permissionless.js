@@ -25,7 +25,9 @@ import { foundry } from "viem/chains"
 import {
     type KernelVersion,
     to7702KernelSmartAccount,
+    to7702ModularSmartAccount,
     toKernelSmartAccount,
+    toModularSmartAccount,
     toThirdwebSmartAccount
 } from "../../permissionless/accounts"
 import { toBiconomySmartAccount } from "../../permissionless/accounts/biconomy/toBiconomySmartAccount"
@@ -56,12 +58,26 @@ import {
 import { createPimlicoClient } from "../../permissionless/clients/pimlico"
 import type { AAParamType } from "./types"
 
+export const getLatestEntryPointVersion = (account: {
+    supportsEntryPointV06?: boolean
+    supportsEntryPointV07?: boolean
+    supportsEntryPointV08?: boolean
+}): "0.6" | "0.7" | "0.8" => {
+    if (account.supportsEntryPointV08) return "0.8"
+    if (account.supportsEntryPointV07) return "0.7"
+    if (account.supportsEntryPointV06) return "0.6"
+    throw new Error("no valid entrypoint supported")
+}
+
 export const PAYMASTER_RPC = "http://localhost:3000"
 
 export const ensureBundlerIsReady = async ({
     altoRpc,
     anvilRpc
-}: { altoRpc: string; anvilRpc: string }) => {
+}: {
+    altoRpc: string
+    anvilRpc: string
+}) => {
     const bundlerClient = getBundlerClient({
         altoRpc: altoRpc,
         anvilRpc,
@@ -99,7 +115,10 @@ export const ensurePaymasterIsReady = async () => {
 export const getAnvilWalletClient = ({
     addressIndex,
     anvilRpc
-}: { addressIndex: number; anvilRpc: string }) => {
+}: {
+    addressIndex: number
+    anvilRpc: string
+}) => {
     return createWalletClient({
         account: mnemonicToAccount(
             "test test test test test test test test test test test junk",
@@ -479,6 +498,35 @@ export const getEtherspotClient = async <
             address: entryPoint07Address,
             version: "0.7"
         }
+    })
+}
+
+export const getModularAccountClient = async ({
+    anvilRpc,
+    privateKey
+}: AAParamType<"0.8">) => {
+    return toModularSmartAccount({
+        client: getPublicClient(anvilRpc),
+        owner: privateKeyToAccount(privateKey ?? generatePrivateKey()),
+        entryPoint: {
+            address: entryPoint08Address,
+            version: "0.8"
+        }
+    })
+}
+
+export const get7702ModularAccountClient = async ({
+    anvilRpc,
+    privateKey
+}: AAParamType<"0.8">) => {
+    return to7702ModularSmartAccount({
+        client: getPublicClient(anvilRpc),
+        owner: privateKeyToAccount(privateKey ?? generatePrivateKey()),
+        entryPoint: {
+            address: entryPoint08Address,
+            version: "0.8"
+        },
+        accountLogicAddress: "0x00aa01009bc20e8a223c995a1527f0cbe9340bd5"
     })
 }
 
@@ -1086,6 +1134,53 @@ export const getCoreSmartAccounts = (): Array<{
         supportsEntryPointV06: true,
         supportsEntryPointV07: true,
         supportsEntryPointV08: false,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Modular",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await getModularAccountClient(
+                    conf as AAParamType<"0.8">
+                ),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async (
+            conf: AAParamType<EntryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await getModularAccountClient(
+                    conf as AAParamType<"0.8">
+                ),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: false,
+        supportsEntryPointV08: true,
+        isEip1271Compliant: true
+    },
+    {
+        name: "Modular + EIP-7702",
+        getSmartAccountClient: async (conf: AAParamType<EntryPointVersion>) =>
+            getBundlerClient({
+                account: await get7702ModularAccountClient(
+                    conf as AAParamType<"0.8">
+                ),
+                ...conf
+            }),
+        getErc7579SmartAccountClient: async (
+            conf: AAParamType<EntryPointVersion>
+        ) =>
+            getSmartAccountClient({
+                account: await get7702ModularAccountClient(
+                    conf as AAParamType<"0.8">
+                ),
+                ...conf
+            }),
+        supportsEntryPointV06: false,
+        supportsEntryPointV07: false,
+        supportsEntryPointV08: true,
+        isEip7702Compliant: true,
         isEip1271Compliant: true
     }
 ]
