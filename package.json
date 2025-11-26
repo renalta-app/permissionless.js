@@ -1,14 +1,95 @@
 {
+    "name": "permissionless",
+    "version": "0.3.2",
     "workspaces": [
         "packages/permissionless",
         "packages/wagmi",
         "packages/wagmi-demo",
         "packages/mock-paymaster"
     ],
-    "private": true,
     "author": "Pimlico",
     "type": "module",
     "sideEffects": false,
+    "main": "./packages/permissionless/_cjs/index.js",
+    "module": "./packages/permissionless/_esm/index.js",
+    "types": "./packages/permissionless/_types/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./packages/permissionless/_types/index.d.ts",
+            "import": "./packages/permissionless/_esm/index.js",
+            "default": "./packages/permissionless/_cjs/index.js"
+        },
+        "./accounts": {
+            "types": "./packages/permissionless/_types/accounts/index.d.ts",
+            "import": "./packages/permissionless/_esm/accounts/index.js",
+            "default": "./packages/permissionless/_cjs/accounts/index.js"
+        },
+        "./accounts/safe": {
+            "types": "./packages/permissionless/_types/accounts/safe/index.d.ts",
+            "import": "./packages/permissionless/_esm/accounts/safe/index.js",
+            "default": "./packages/permissionless/_cjs/accounts/safe/index.js"
+        },
+        "./actions": {
+            "types": "./packages/permissionless/_types/actions/index.d.ts",
+            "import": "./packages/permissionless/_esm/actions/index.js",
+            "default": "./packages/permissionless/_cjs/actions/index.js"
+        },
+        "./actions/erc7579": {
+            "types": "./packages/permissionless/_types/actions/erc7579.d.ts",
+            "import": "./packages/permissionless/_esm/actions/erc7579.js",
+            "default": "./packages/permissionless/_cjs/actions/erc7579.js"
+        },
+        "./actions/pimlico": {
+            "types": "./packages/permissionless/_types/actions/pimlico.d.ts",
+            "import": "./packages/permissionless/_esm/actions/pimlico.js",
+            "default": "./packages/permissionless/_cjs/actions/pimlico.js"
+        },
+        "./actions/passkeyServer": {
+            "types": "./packages/permissionless/_types/actions/passkeyServer.d.ts",
+            "import": "./packages/permissionless/_esm/actions/passkeyServer.js",
+            "default": "./packages/permissionless/_cjs/actions/passkeyServer.js"
+        },
+        "./actions/etherspot": {
+            "types": "./packages/permissionless/_types/actions/etherspot.d.ts",
+            "import": "./packages/permissionless/_esm/actions/etherspot.js",
+            "default": "./packages/permissionless/_cjs/actions/etherspot.js"
+        },
+        "./actions/smartAccount": {
+            "types": "./packages/permissionless/_types/actions/smartAccount.d.ts",
+            "import": "./packages/permissionless/_esm/actions/smartAccount.js",
+            "default": "./packages/permissionless/_cjs/actions/smartAccount.js"
+        },
+        "./clients": {
+            "types": "./packages/permissionless/_types/clients/index.d.ts",
+            "import": "./packages/permissionless/_esm/clients/index.js",
+            "default": "./packages/permissionless/_cjs/clients/index.js"
+        },
+        "./clients/pimlico": {
+            "types": "./packages/permissionless/_types/clients/pimlico.d.ts",
+            "import": "./packages/permissionless/_esm/clients/pimlico.js",
+            "default": "./packages/permissionless/_cjs/clients/pimlico.js"
+        },
+        "./clients/passkeyServer": {
+            "types": "./packages/permissionless/_types/clients/passkeyServer.d.ts",
+            "import": "./packages/permissionless/_esm/clients/passkeyServer.js",
+            "default": "./packages/permissionless/_cjs/clients/passkeyServer.js"
+        },
+        "./utils": {
+            "types": "./packages/permissionless/_types/utils/index.d.ts",
+            "import": "./packages/permissionless/_esm/utils/index.js",
+            "default": "./packages/permissionless/_cjs/utils/index.js"
+        },
+        "./errors": {
+            "types": "./packages/permissionless/_types/errors/index.d.ts",
+            "import": "./packages/permissionless/_esm/errors/index.js",
+            "default": "./packages/permissionless/_cjs/errors/index.js"
+        },
+        "./experimental/pimlico": {
+            "types": "./packages/permissionless/_types/experimental/pimlico/index.d.ts",
+            "import": "./packages/permissionless/_esm/experimental/pimlico/index.js",
+            "default": "./packages/permissionless/_cjs/experimental/pimlico/index.js"
+        }
+    },
     "devDependencies": {
         "@biomejs/biome": "^1.0.0",
         "@changesets/changelog-git": "^0.1.14",
