@@ -330,5 +330,5 @@ export async function toModularSmartAccount<
         }
     })
 
-    return account as ToModularSmartAccountReturnType<eip7702>
+    return account as unknown as ToModularSmartAccountReturnType<eip7702>
 }

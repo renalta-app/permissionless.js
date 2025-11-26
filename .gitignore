@@ -1,6 +1,7 @@
-_cjs
-_esm
-_types
+# Build output - commented out to allow committing for GitHub installs
+# _cjs
+# _esm
+# _types
 *.local
 .DS_Store
 .eslintcache
