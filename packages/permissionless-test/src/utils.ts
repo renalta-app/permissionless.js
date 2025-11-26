@@ -74,10 +74,7 @@ export const PAYMASTER_RPC = "http://localhost:3000"
 export const ensureBundlerIsReady = async ({
     altoRpc,
     anvilRpc
-}: {
-    altoRpc: string
-    anvilRpc: string
-}) => {
+}: { altoRpc: string; anvilRpc: string }) => {
     const bundlerClient = getBundlerClient({
         altoRpc: altoRpc,
         anvilRpc,
@@ -115,10 +112,7 @@ export const ensurePaymasterIsReady = async () => {
 export const getAnvilWalletClient = ({
     addressIndex,
     anvilRpc
-}: {
-    addressIndex: number
-    anvilRpc: string
-}) => {
+}: { addressIndex: number; anvilRpc: string }) => {
     return createWalletClient({
         account: mnemonicToAccount(
             "test test test test test test test test test test test junk",

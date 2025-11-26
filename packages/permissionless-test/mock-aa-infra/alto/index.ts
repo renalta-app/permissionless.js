@@ -90,6 +90,8 @@ const DETERMINISTIC_DEPLOYER = "0x4e59b44847b379578588920ca78fbf26c0b4956c"
 const SAFE_SINGLETON_FACTORY = "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7"
 const BICONOMY_SINGLETON_FACTORY = "0x988C135a1049Ce61730724afD342fb7C56CD2776"
 const SAFE_7579_REGISTRY = "0x000000000069E2a187AEFFb852bF3cCdC95151B2"
+const MODULAR_IMPLEMENTATION = "0x00aa01009bc20e8a223c995a1527f0cbe9340bd5"
+const MODULAR_FACTORY = "0x00af0100b5d4dd9bacc054282c103530287e7305"
 
 const verifyDeployed = async (client: PublicClient, addresses: Address[]) => {
     for (const address of addresses) {
@@ -131,13 +133,12 @@ export const setupContracts = async (rpc: string) => {
         bytecode: SAFE_SINGLETON_FACTORY_BYTECODE
     })
 
-    // Etch Modular Account contracts at their vanity addresses
     await anvilClient.setCode({
-        address: "0x00aa01009bc20e8a223c995a1527f0cbe9340bd5",
+        address: MODULAR_IMPLEMENTATION,
         bytecode: MODULAR_ACCOUNT_IMPLEMENTATION_BYTECODE
     })
     await anvilClient.setCode({
-        address: "0x00af0100b5d4dd9bacc054282c103530287e7305",
+        address: MODULAR_FACTORY,
         bytecode: MODULAR_ACCOUNT_FACTORY_BYTECODE
     })
 
@@ -725,8 +726,6 @@ export const setupContracts = async (rpc: string) => {
         "0x4337084d9e255ff0702461cf8895ce9e3b5ff108", // EntryPoint 0.8
         "0x13E9ed32155810FDbd067D4522C492D6f68E5944", // Simple Account Factory 0.8
         "0xe6Cae83BdE06E4c305530e199D7217f42808555B", // Simple Account V0.8 implementation
-        // "0x00af01003c0beabb4d128ba12145bc7903b8dc26", // Modular Account Factory 0.8
-        // "0x00aa0100499ca89110aecf2b743032a07cccf23c", // Modular Account Implementation 0.8
         "0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7", // Safe Singleton Factory
         "0x988C135a1049Ce61730724afD342fb7C56CD2776", // Biconomy Singleton Factory
         "0x0000000071727De22E5E9d8BAf0edAc6f37da032", // EntryPoint 0.7

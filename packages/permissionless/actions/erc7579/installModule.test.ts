@@ -4,232 +4,214 @@ import { describe, expect } from "vitest"
 import { testWithRpc } from "../../../permissionless-test/src/testWithRpc"
 import {
     getCoreSmartAccounts,
+    getLatestEntryPointVersion,
     getPublicClient
 } from "../../../permissionless-test/src/utils"
 import { erc7579Actions } from "../erc7579"
 import { installModule } from "./installModule"
 
-describe.each(getCoreSmartAccounts())(
-    "installModule $name",
-    ({
-        getErc7579SmartAccountClient,
-        name,
-        isEip7702Compliant,
-        supportsEntryPointV06,
-        supportsEntryPointV07,
-        supportsEntryPointV08
-    }) => {
-        testWithRpc.skipIf(!getErc7579SmartAccountClient)(
-            "installModule",
-            async ({ rpc }) => {
-                if (!getErc7579SmartAccountClient) {
-                    throw new Error("getErc7579SmartAccountClient not defined")
-                }
+describe.each(getCoreSmartAccounts())("installModule $name", (account) => {
+    const { getErc7579SmartAccountClient, name, isEip7702Compliant } = account
 
-                const privateKey =
-                    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
-
-                const privateKeyAccount = privateKeyToAccount(privateKey)
-
-                const entryPointVersion = supportsEntryPointV08
-                    ? "0.8"
-                    : supportsEntryPointV07
-                      ? "0.7"
-                      : "0.6"
-
-                const smartClientWithoutExtend =
-                    await getErc7579SmartAccountClient({
-                        entryPoint: {
-                            version: entryPointVersion
-                        },
-                        privateKey,
-                        ...rpc
-                    })
-
-                const publicClient = getPublicClient(rpc.anvilRpc)
-
-                const smartClient = smartClientWithoutExtend.extend(
-                    erc7579Actions()
-                )
-
-                const moduleData = encodePacked(
-                    ["address"],
-                    [smartClient.account.address]
-                )
-
-                const opHash = await installModule(smartClient, {
-                    account: smartClient.account,
-                    type: "executor",
-                    address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
-                    initData: name.startsWith("Kernel 7579")
-                        ? encodePacked(
-                              ["address", "bytes"],
-                              [
-                                  zeroAddress,
-                                  encodeAbiParameters(
-                                      [{ type: "bytes" }, { type: "bytes" }],
-                                      [moduleData, "0x"]
-                                  )
-                              ]
-                          )
-                        : moduleData,
-                    authorization: isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
-                              address: (smartClient.account as any)
-                                  .implementation,
-                              chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
-                          })
-                        : undefined
-                })
-
-                expect(isHash(opHash)).toBe(true)
-
-                const userOperationReceipt =
-                    await smartClient.waitForUserOperationReceipt({
-                        hash: opHash,
-                        timeout: 100000
-                    })
-
-                expect(userOperationReceipt).not.toBeNull()
-                expect(userOperationReceipt?.userOpHash).toBe(opHash)
-                expect(
-                    userOperationReceipt?.receipt.transactionHash
-                ).toBeTruthy()
-
-                const receipt = await smartClient.getUserOperationReceipt({
-                    hash: opHash
-                })
-
-                expect(receipt?.receipt.transactionHash).toBe(
-                    userOperationReceipt?.receipt.transactionHash
-                )
-
-                const isModuleInstalled = await smartClient.isModuleInstalled({
-                    type: "executor",
-                    address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
-                    context: "0x"
-                })
-
-                expect(isModuleInstalled).toBe(true)
+    testWithRpc.skipIf(!getErc7579SmartAccountClient)(
+        "installModule",
+        async ({ rpc }) => {
+            if (!getErc7579SmartAccountClient) {
+                throw new Error("getErc7579SmartAccountClient not defined")
             }
-        )
-        testWithRpc.skipIf(!getErc7579SmartAccountClient)(
-            "installModule",
-            async ({ rpc }) => {
-                if (!getErc7579SmartAccountClient) {
-                    throw new Error("getErc7579SmartAccountClient not defined")
+
+            const privateKey =
+                "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
+
+            const privateKeyAccount = privateKeyToAccount(privateKey)
+
+            const entryPointVersion = getLatestEntryPointVersion(account)
+
+            const smartClientWithoutExtend = await getErc7579SmartAccountClient(
+                {
+                    entryPoint: {
+                        version: entryPointVersion
+                    },
+                    privateKey,
+                    ...rpc
                 }
+            )
 
-                const privateKey =
-                    "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
+            const publicClient = getPublicClient(rpc.anvilRpc)
 
-                const privateKeyAccount = privateKeyToAccount(privateKey)
+            const smartClient = smartClientWithoutExtend.extend(
+                erc7579Actions()
+            )
 
-                const entryPointVersion = supportsEntryPointV08
-                    ? "0.8"
-                    : supportsEntryPointV07
-                      ? "0.7"
-                      : "0.6"
+            const moduleData = encodePacked(
+                ["address"],
+                [smartClient.account.address]
+            )
 
-                const smartClientWithoutExtend =
-                    await getErc7579SmartAccountClient({
-                        entryPoint: {
-                            version: entryPointVersion
-                        },
-                        privateKey,
-                        ...rpc
-                    })
-
-                const publicClient = getPublicClient(rpc.anvilRpc)
-
-                const smartClient = smartClientWithoutExtend.extend(
-                    erc7579Actions()
-                )
-
-                const userOpHash = await smartClient.sendUserOperation({
-                    calls: [
-                        {
-                            to: smartClient.account.address,
-                            value: 0n,
-                            data: "0x"
-                        },
-                        {
-                            to: smartClient.account.address,
-                            value: 0n,
-                            data: "0x"
-                        }
-                    ],
-                    authorization: isEip7702Compliant
-                        ? await privateKeyAccount.signAuthorization({
-                              address: (smartClient.account as any)
-                                  .implementation,
-                              chainId: smartClient.chain.id,
-                              nonce: await publicClient.getTransactionCount({
-                                  address: smartClient.account.address
-                              })
+            const opHash = await installModule(smartClient, {
+                account: smartClient.account,
+                type: "executor",
+                address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
+                initData: name.startsWith("Kernel 7579")
+                    ? encodePacked(
+                          ["address", "bytes"],
+                          [
+                              zeroAddress,
+                              encodeAbiParameters(
+                                  [{ type: "bytes" }, { type: "bytes" }],
+                                  [moduleData, "0x"]
+                              )
+                          ]
+                      )
+                    : moduleData,
+                authorization: isEip7702Compliant
+                    ? await privateKeyAccount.signAuthorization({
+                          address: (smartClient.account as any).implementation,
+                          chainId: smartClient.chain.id,
+                          nonce: await publicClient.getTransactionCount({
+                              address: smartClient.account.address
                           })
-                        : undefined
-                })
+                      })
+                    : undefined
+            })
 
+            expect(isHash(opHash)).toBe(true)
+
+            const userOperationReceipt =
                 await smartClient.waitForUserOperationReceipt({
-                    hash: userOpHash
+                    hash: opHash,
+                    timeout: 100000
                 })
 
-                const moduleData = encodePacked(
-                    ["address"],
-                    [smartClient.account.address]
-                )
+            expect(userOperationReceipt).not.toBeNull()
+            expect(userOperationReceipt?.userOpHash).toBe(opHash)
+            expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
 
-                const opHash = await installModule(smartClient, {
-                    account: smartClient.account,
-                    type: "executor",
-                    address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
-                    context: name.startsWith("Kernel 7579")
-                        ? encodePacked(
-                              ["address", "bytes"],
-                              [
-                                  zeroAddress,
-                                  encodeAbiParameters(
-                                      [{ type: "bytes" }, { type: "bytes" }],
-                                      [moduleData, "0x"]
-                                  )
-                              ]
-                          )
-                        : moduleData
-                })
+            const receipt = await smartClient.getUserOperationReceipt({
+                hash: opHash
+            })
 
-                expect(isHash(opHash)).toBe(true)
+            expect(receipt?.receipt.transactionHash).toBe(
+                userOperationReceipt?.receipt.transactionHash
+            )
 
-                const userOperationReceipt =
-                    await smartClient.waitForUserOperationReceipt({
-                        hash: opHash,
-                        timeout: 100000
-                    })
-                expect(userOperationReceipt).not.toBeNull()
-                expect(userOperationReceipt?.userOpHash).toBe(opHash)
-                expect(
-                    userOperationReceipt?.receipt.transactionHash
-                ).toBeTruthy()
+            const isModuleInstalled = await smartClient.isModuleInstalled({
+                type: "executor",
+                address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
+                context: "0x"
+            })
 
-                const receipt = await smartClient.getUserOperationReceipt({
-                    hash: opHash
-                })
+            expect(isModuleInstalled).toBe(true)
+        }
+    )
 
-                expect(receipt?.receipt.transactionHash).toBe(
-                    userOperationReceipt?.receipt.transactionHash
-                )
-
-                const isModuleInstalled = await smartClient.isModuleInstalled({
-                    type: "executor",
-                    address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
-                    context: "0x"
-                })
-
-                expect(isModuleInstalled).toBe(true)
+    testWithRpc.skipIf(!getErc7579SmartAccountClient)(
+        "installModule",
+        async ({ rpc }) => {
+            if (!getErc7579SmartAccountClient) {
+                throw new Error("getErc7579SmartAccountClient not defined")
             }
-        )
-    }
-)
+
+            const privateKey =
+                "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356"
+
+            const privateKeyAccount = privateKeyToAccount(privateKey)
+
+            const entryPointVersion = getLatestEntryPointVersion(account)
+
+            const smartClientWithoutExtend = await getErc7579SmartAccountClient(
+                {
+                    entryPoint: {
+                        version: entryPointVersion
+                    },
+                    privateKey,
+                    ...rpc
+                }
+            )
+
+            const publicClient = getPublicClient(rpc.anvilRpc)
+
+            const smartClient = smartClientWithoutExtend.extend(
+                erc7579Actions()
+            )
+
+            const userOpHash = await smartClient.sendUserOperation({
+                calls: [
+                    {
+                        to: smartClient.account.address,
+                        value: 0n,
+                        data: "0x"
+                    },
+                    {
+                        to: smartClient.account.address,
+                        value: 0n,
+                        data: "0x"
+                    }
+                ],
+                authorization: isEip7702Compliant
+                    ? await privateKeyAccount.signAuthorization({
+                          address: (smartClient.account as any).implementation,
+                          chainId: smartClient.chain.id,
+                          nonce: await publicClient.getTransactionCount({
+                              address: smartClient.account.address
+                          })
+                      })
+                    : undefined
+            })
+
+            await smartClient.waitForUserOperationReceipt({
+                hash: userOpHash
+            })
+
+            const moduleData = encodePacked(
+                ["address"],
+                [smartClient.account.address]
+            )
+
+            const opHash = await installModule(smartClient, {
+                account: smartClient.account,
+                type: "executor",
+                address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
+                context: name.startsWith("Kernel 7579")
+                    ? encodePacked(
+                          ["address", "bytes"],
+                          [
+                              zeroAddress,
+                              encodeAbiParameters(
+                                  [{ type: "bytes" }, { type: "bytes" }],
+                                  [moduleData, "0x"]
+                              )
+                          ]
+                      )
+                    : moduleData
+            })
+
+            expect(isHash(opHash)).toBe(true)
+
+            const userOperationReceipt =
+                await smartClient.waitForUserOperationReceipt({
+                    hash: opHash,
+                    timeout: 100000
+                })
+            expect(userOperationReceipt).not.toBeNull()
+            expect(userOperationReceipt?.userOpHash).toBe(opHash)
+            expect(userOperationReceipt?.receipt.transactionHash).toBeTruthy()
+
+            const receipt = await smartClient.getUserOperationReceipt({
+                hash: opHash
+            })
+
+            expect(receipt?.receipt.transactionHash).toBe(
+                userOperationReceipt?.receipt.transactionHash
+            )
+
+            const isModuleInstalled = await smartClient.isModuleInstalled({
+                type: "executor",
+                address: "0x4Fd8d57b94966982B62e9588C27B4171B55E8354",
+                context: "0x"
+            })
+
+            expect(isModuleInstalled).toBe(true)
+        }
+    )
+})

@@ -24,7 +24,7 @@ import {
     getUserOperationTypedData,
     toSmartAccount
 } from "viem/account-abstraction"
-import { getChainId, readContract } from "viem/actions"
+import { getChainId } from "viem/actions"
 import { getAction } from "viem/utils"
 import { getAccountNonce } from "../../actions/public/getAccountNonce.js"
 import { getSenderAddress } from "../../actions/public/getSenderAddress.js"
@@ -330,7 +330,5 @@ export async function toModularSmartAccount<
         }
     })
 
-    // @ts-expect-error - authorization property intentionally not set due to viem's isDeployed() caching bug
-    // The script should pass authorization explicitly to sendTransaction when needed
     return account as ToModularSmartAccountReturnType<eip7702>
 }
